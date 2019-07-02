@@ -3,6 +3,7 @@ package libansible
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -78,14 +79,10 @@ func ExitJson(responseBody Response) {
 	returnResponse(responseBody)
 }
 
-func failJson(responseBody Response) {
-	responseBody.Failed = true
-	returnResponse(responseBody)
-}
-
 func FailJson(responseBody Response, err error) {
 	responseBody.Msg = err.Error()
-	failJson(responseBody)
+	responseBody.Failed = true
+	returnResponse(responseBody)
 }
 
 func returnResponse(responseBody Response) {
@@ -101,16 +98,14 @@ func returnResponse(responseBody Response) {
 	}
 }
 
-func ReadInput() ([]byte) {
+func ReadInput() []byte {
 	var response Response
 	if len(os.Args) != 2 {
-		response.Msg = "No argument file provided"
-		failJson(response)
+		FailJson(response, errors.New("No argument file provided"))
 	}
 	input, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
-		response.Msg = fmt.Sprintf("Could not read configuration file: %s", err)
-		failJson(response)
+		FailJson(response, fmt.Errorf("Could not read configuration file: %s", err))
 	}
 	return input
 }
