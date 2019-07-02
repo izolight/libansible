@@ -83,6 +83,11 @@ func FailJson(responseBody Response) {
 	returnResponse(responseBody)
 }
 
+func FailErrorJson(responseBody Response, err error) {
+	responseBody.Msg = err.Error()
+	FailJson(responseBody)
+}
+
 func returnResponse(responseBody Response) {
 	response, err := json.Marshal(responseBody)
 	if err != nil {
