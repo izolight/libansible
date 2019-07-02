@@ -78,14 +78,14 @@ func ExitJson(responseBody Response) {
 	returnResponse(responseBody)
 }
 
-func FailJson(responseBody Response) {
+func failJson(responseBody Response) {
 	responseBody.Failed = true
 	returnResponse(responseBody)
 }
 
-func FailErrorJson(responseBody Response, err error) {
+func FailJson(responseBody Response, err error) {
 	responseBody.Msg = err.Error()
-	FailJson(responseBody)
+	failJson(responseBody)
 }
 
 func returnResponse(responseBody Response) {
@@ -105,12 +105,12 @@ func ReadInput() ([]byte) {
 	var response Response
 	if len(os.Args) != 2 {
 		response.Msg = "No argument file provided"
-		FailJson(response)
+		failJson(response)
 	}
 	input, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
 		response.Msg = fmt.Sprintf("Could not read configuration file: %s", err)
-		FailJson(response)
+		failJson(response)
 	}
 	return input
 }
