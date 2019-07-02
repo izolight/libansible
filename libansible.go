@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 )
 
@@ -93,4 +94,18 @@ func returnResponse(responseBody Response) {
 	} else {
 		os.Exit(0)
 	}
+}
+
+func ReadInput() ([]byte) {
+	var response Response
+	if len(os.Args) != 2 {
+		response.Msg = "No argument file provided"
+		FailJson(response)
+	}
+	input, err := ioutil.ReadFile(os.Args[1])
+	if err != nil {
+		response.Msg = fmt.Sprintf("Could not read configuration file: %s", err)
+		FailJson(response)
+	}
+	return input
 }
