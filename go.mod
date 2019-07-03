@@ -1,3 +1,3 @@
-module gitea.izolight.xyz/gabor/libansible
+module github.com/izolight/libansible
 
 go 1.12
