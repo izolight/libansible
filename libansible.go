@@ -57,6 +57,26 @@ func (s *State) UnmarshalJSON(b []byte) error {
 	return fmt.Errorf("State should be absent or present, was %s", j)
 }
 
+type String []string
+
+func (s String) UnmarshalJSON(b []byte) error {
+	var j interface{}
+	err := json.Unmarshal(b, &j)
+	if err != nil {
+		return err
+	}
+	switch v := j.(type) {
+	case nil:
+		return nil
+	case string:
+		s = []string{v}
+		return nil
+	case []string:
+		s = v
+	}
+	return fmt.Errorf("Input should be string or list of strings, was %t", j)
+}
+
 type Response struct {
 	Changed    bool       `json:"changed"`
 	Failed     bool       `json:"failed"`
