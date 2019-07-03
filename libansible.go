@@ -58,12 +58,12 @@ func (s *State) UnmarshalJSON(b []byte) error {
 }
 
 type Response struct {
-	Msg        string     `json:"msg"`
 	Changed    bool       `json:"changed"`
 	Failed     bool       `json:"failed"`
-	Stdout     string     `json:"stdout"`
+	Stdout     string     `json:"stdout,omitempty"`
+	Stderr     string     `json:"stderr,omitempty"`
 	Invocation Invocation `json:"invocation"`
-	Diff       Diff       `json:"diff"`
+	Diff       Diff       `json:"diff,omitempty"`
 }
 
 type Invocation struct {
@@ -80,7 +80,7 @@ func ExitJson(responseBody Response) {
 }
 
 func FailJson(responseBody Response, err error) {
-	responseBody.Msg = err.Error()
+	responseBody.Stderr = err.Error()
 	responseBody.Failed = true
 	returnResponse(responseBody)
 }
@@ -88,7 +88,7 @@ func FailJson(responseBody Response, err error) {
 func returnResponse(responseBody Response) {
 	response, err := json.Marshal(responseBody)
 	if err != nil {
-		response, _ = json.Marshal(Response{Msg: "Invalid response object"})
+		response, _ = json.Marshal(Response{Stderr: "Invalid response object"})
 	}
 	fmt.Println(string(response))
 	if responseBody.Failed {
