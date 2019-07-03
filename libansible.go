@@ -59,7 +59,7 @@ func (s *State) UnmarshalJSON(b []byte) error {
 
 type String []string
 
-func (s String) UnmarshalJSON(b []byte) error {
+func (s *String) UnmarshalJSON(b []byte) error {
 	var j interface{}
 	err := json.Unmarshal(b, &j)
 	if err != nil {
@@ -69,10 +69,17 @@ func (s String) UnmarshalJSON(b []byte) error {
 	case nil:
 		return nil
 	case string:
-		s = []string{v}
+		*s = []string{v}
 		return nil
-	case []string:
-		s = v
+	case []interface{}:
+		for _, i := range v {
+			k, ok := i.(string)
+			if !ok {
+				return fmt.Errorf("List element was not a string, was %t", i)
+			}
+			*s = append(*s, k)
+		}
+		return nil
 	}
 	return fmt.Errorf("Input should be string or list of strings, was %t", j)
 }
