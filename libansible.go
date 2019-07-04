@@ -143,7 +143,7 @@ func ReadInput(args []string) []byte {
 	if len(args) != 2 {
 		FailJson(response, errors.New("No argument file provided"))
 	}
-	input, err := ioutil.ReadFile(os.Args[1])
+	input, err := ioutil.ReadFile(args[1])
 	if err != nil {
 		FailJson(response, fmt.Errorf("Could not read configuration file: %s", err))
 	}

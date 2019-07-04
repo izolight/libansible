@@ -1,6 +1,8 @@
 package libansible
 
 import (
+	"io/ioutil"
+	"os"
 	"reflect"
 	"testing"
 )
@@ -70,6 +72,30 @@ func TestState_UnmarshalJSON(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if err := tt.s.UnmarshalJSON(tt.args.b); (err != nil) != tt.wantErr {
 				t.Errorf("State.UnmarshalJSON() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestReadInput(t *testing.T) {
+	err := ioutil.WriteFile("/tmp/testfile", []byte(`{"test": true}`), 0600)
+	if err != nil {
+		t.Fail()
+	}
+	type args struct {
+		args []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want []byte
+	}{
+		{"testfile", args{[]string{os.Args[0], "/tmp/testfile"}}, []byte(`{"test": true}`)},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := ReadInput(tt.args.args); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ReadInput() = %v, want %v", got, tt.want)
 			}
 		})
 	}
