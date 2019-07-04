@@ -138,9 +138,9 @@ func returnResponse(responseBody Response) {
 }
 
 // ReadInput checks if the only argument is the provided json file and reads the file
-func ReadInput() []byte {
+func ReadInput(args []string) []byte {
 	var response Response
-	if len(os.Args) != 2 {
+	if len(args) != 2 {
 		FailJson(response, errors.New("No argument file provided"))
 	}
 	input, err := ioutil.ReadFile(os.Args[1])
