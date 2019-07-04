@@ -9,6 +9,7 @@ import (
 	"os"
 )
 
+// AnsibleArgs contains the builtin arguments which Ansible passes when invoking a module
 type AnsibleArgs struct {
 	AnsibleCheckMode              bool        `json:"_ansible_check_mode,omitempty"`
 	AnsibleNoLog                  bool        `json:"_ansible_no_log,omitempty"`
@@ -27,8 +28,10 @@ type AnsibleArgs struct {
 	AnsibleRemoteTmp              string      `json:"_ansible_remote_tmp,omitempty"`
 }
 
+// State maps true/false to absent/present
 type State bool
 
+// MarshalJSON converts a json bool value to absent/present
 func (s State) MarshalJSON() ([]byte, error) {
 	buffer := bytes.NewBufferString(`"`)
 	if bool(s) {
@@ -40,6 +43,7 @@ func (s State) MarshalJSON() ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
+// UnmarshalJSON converts absent/present to a json bool value
 func (s *State) UnmarshalJSON(b []byte) error {
 	var j string
 	err := json.Unmarshal(b, &j)
@@ -57,8 +61,10 @@ func (s *State) UnmarshalJSON(b []byte) error {
 	return fmt.Errorf("State should be absent or present, was %s", j)
 }
 
+// String is a slice of strings that can also be a single string when converting from json
 type String []string
 
+// UnmarshalJSON converts a single string or a list of strings to a slice of strings
 func (s *String) UnmarshalJSON(b []byte) error {
 	var j interface{}
 	err := json.Unmarshal(b, &j)
@@ -84,6 +90,7 @@ func (s *String) UnmarshalJSON(b []byte) error {
 	return fmt.Errorf("Input should be string or list of strings, was %t", j)
 }
 
+// Response contains the fields which Ansible expects as module output
 type Response struct {
 	Changed    bool       `json:"changed"`
 	Failed     bool       `json:"failed"`
@@ -93,25 +100,30 @@ type Response struct {
 	Diff       Diff       `json:"diff,omitempty"`
 }
 
+// Invocation contains the Module Arguments (might be more in the future)
 type Invocation struct {
 	ModuleArgs interface{} `json:"module_args,omitempty"`
 }
 
+// Diff is a simple structure that contains a string for the state before and after module execution
 type Diff struct {
 	Before string `json:"before"`
 	After  string `json:"after"`
 }
 
+// ExitJson returns the Response Object as Json
 func ExitJson(responseBody Response) {
 	returnResponse(responseBody)
 }
 
+// FailJson sets the stderr field to the provided error and sets the failed state to true and returns the response as json
 func FailJson(responseBody Response, err error) {
 	responseBody.Stderr = err.Error()
 	responseBody.Failed = true
 	returnResponse(responseBody)
 }
 
+// returnResponse takes a Response struct and outputs json to stdout and sets the exit code according to failed state
 func returnResponse(responseBody Response) {
 	response, err := json.Marshal(responseBody)
 	if err != nil {
@@ -125,6 +137,7 @@ func returnResponse(responseBody Response) {
 	}
 }
 
+// ReadInput checks if the only argument is the provided json file and reads the file
 func ReadInput() []byte {
 	var response Response
 	if len(os.Args) != 2 {
