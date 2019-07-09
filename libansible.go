@@ -64,6 +64,18 @@ func (s *State) UnmarshalJSON(b []byte) error {
 // String is a slice of strings that can also be a single string when converting from json
 type String []string
 
+// MarshalJSON converts a String type either to a list or single string, depending on length
+func (s String) MarshalJSON() ([]byte, error) {
+	switch len(s) {
+	case 0:
+		return []byte(`""`), nil
+	case 1:
+		return []byte(`"` + s[0] + `"`), nil
+	default:
+		return json.Marshal([]string(s))
+	}
+}
+
 // UnmarshalJSON converts a single string or a list of strings to a slice of strings
 func (s *String) UnmarshalJSON(b []byte) error {
 	var j interface{}
