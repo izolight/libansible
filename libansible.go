@@ -102,6 +102,46 @@ func (s *String) UnmarshalJSON(b []byte) error {
 	return fmt.Errorf("Input should be string or list of strings, was %t", j)
 }
 
+func contains(a []string, x string) bool {
+	for _, n := range a {
+		if x == n {
+			return true
+		}
+	}
+	return false
+}
+
+type Bool bool
+
+func (b *Bool) UnmarshalJSON(in []byte) error {
+	var j interface{}
+	err := json.Unmarshal(in, &j)
+	if err != nil {
+		return err
+	}
+	switch v := j.(type) {
+	case nil:
+		return nil
+	case string:
+		yes := []string{"Yes", "yes", "True", "true"}
+		no := []string{"No", "no", "False", "false"}
+		if contains(yes, v) {
+			*b = true
+		} else if contains(no, v){
+			*b = false
+		} else {
+			return fmt.Errorf("Invalid value, needs to be truthy or falsy: %s", v)
+		}
+	case bool:
+		*b = Bool(v)
+	}
+	return nil
+}
+
+func (b Bool) MarshalJSON() ([]byte, error) {
+	return json.Marshal(bool(b))
+}
+
 // Response contains the fields which Ansible expects as module output
 type Response struct {
 	Changed    bool       `json:"changed"`
