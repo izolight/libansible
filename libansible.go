@@ -111,7 +111,10 @@ func contains(a []string, x string) bool {
 	return false
 }
 
-type Bool bool
+type Bool struct {
+	Value bool
+	IsSet bool
+}
 
 func (b *Bool) UnmarshalJSON(in []byte) error {
 	var j interface{}
@@ -126,20 +129,25 @@ func (b *Bool) UnmarshalJSON(in []byte) error {
 		yes := []string{"Yes", "yes", "True", "true"}
 		no := []string{"No", "no", "False", "false"}
 		if contains(yes, v) {
-			*b = true
-		} else if contains(no, v){
-			*b = false
+			b.Value = true
+			b.IsSet = true
+		} else if contains(no, v) {
+			b.Value = false
+			b.IsSet = true
+		} else if v == "" {
+			b.IsSet = false
 		} else {
 			return fmt.Errorf("Invalid value, needs to be truthy or falsy: %s", v)
 		}
 	case bool:
-		*b = Bool(v)
+		b.Value = v
+		b.IsSet = true
 	}
 	return nil
 }
 
 func (b Bool) MarshalJSON() ([]byte, error) {
-	return json.Marshal(bool(b))
+	return json.Marshal(bool(b.Value))
 }
 
 // Response contains the fields which Ansible expects as module output
