@@ -214,6 +214,6 @@ type Playbook struct {
 	Name        string                 `json:"name"`
 	Connection  string                 `json:"connection"`
 	Hosts       string                 `json:"hosts"`
-	Tasks       []json.RawMessage      `json:"tasks"`
+	Tasks       json.RawMessage        `json:"tasks"`
 	Environment map[string]interface{} `json:"environment"`
 }
