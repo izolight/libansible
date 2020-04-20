@@ -216,4 +216,5 @@ type Playbook struct {
 	Hosts       string                 `json:"hosts"`
 	Tasks       json.RawMessage        `json:"tasks"`
 	Environment map[string]interface{} `json:"environment"`
+	Become      bool                   `json:"become"`
 }
