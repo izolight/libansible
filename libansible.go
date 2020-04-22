@@ -197,14 +197,14 @@ func returnResponse(responseBody Response, w io.Writer) error {
 }
 
 // ReadInput checks if the only argument is the provided json file and reads the file
-func ReadInput(args []string) []byte {
+func ReadInput(args []string, w io.Writer) []byte {
 	var response Response
 	if len(args) != 2 {
-		FailJson(response, errors.New("No argument file provided"))
+		FailJson(response, errors.New("No argument file provided"), w)
 	}
 	input, err := ioutil.ReadFile(args[1])
 	if err != nil {
-		FailJson(response, fmt.Errorf("Could not read configuration file: %s", err))
+		FailJson(response, fmt.Errorf("Could not read configuration file: %s", err), w)
 	}
 	return input
 }
