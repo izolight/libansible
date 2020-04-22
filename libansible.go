@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 )
 
@@ -171,24 +172,24 @@ type Diff struct {
 }
 
 // ExitJson returns the Response Object as Json
-func ExitJson(responseBody Response) error {
-	return returnResponse(responseBody)
+func ExitJson(responseBody Response, w io.Writer) error {
+	return returnResponse(responseBody, w)
 }
 
 // FailJson sets the stderr field to the provided error and sets the failed state to true and returns the response as json
-func FailJson(responseBody Response, err error) error {
+func FailJson(responseBody Response, err error, w io.Writer) error {
 	responseBody.Stderr = err.Error()
 	responseBody.Failed = true
-	return returnResponse(responseBody)
+	return returnResponse(responseBody, w)
 }
 
 // returnResponse takes a Response struct and outputs json to stdout and sets the exit code according to failed state
-func returnResponse(responseBody Response) error {
+func returnResponse(responseBody Response, w io.Writer) error {
 	response, err := json.Marshal(responseBody)
 	if err != nil {
 		response, _ = json.Marshal(Response{Stderr: "Invalid response object"})
 	}
-	fmt.Println(string(response))
+	fmt.Fprintln(w, string(response))
 	if responseBody.Failed {
 		return fmt.Errorf("module failed: %s", responseBody.Stderr)
 	}
