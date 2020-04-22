@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"os"
 )
 
 // AnsibleArgs contains the builtin arguments which Ansible passes when invoking a module
@@ -172,29 +171,28 @@ type Diff struct {
 }
 
 // ExitJson returns the Response Object as Json
-func ExitJson(responseBody Response) {
-	returnResponse(responseBody)
+func ExitJson(responseBody Response) error {
+	return returnResponse(responseBody)
 }
 
 // FailJson sets the stderr field to the provided error and sets the failed state to true and returns the response as json
-func FailJson(responseBody Response, err error) {
+func FailJson(responseBody Response, err error) error {
 	responseBody.Stderr = err.Error()
 	responseBody.Failed = true
-	returnResponse(responseBody)
+	return returnResponse(responseBody)
 }
 
 // returnResponse takes a Response struct and outputs json to stdout and sets the exit code according to failed state
-func returnResponse(responseBody Response) {
+func returnResponse(responseBody Response) error {
 	response, err := json.Marshal(responseBody)
 	if err != nil {
 		response, _ = json.Marshal(Response{Stderr: "Invalid response object"})
 	}
 	fmt.Println(string(response))
 	if responseBody.Failed {
-		os.Exit(1)
-	} else {
-		os.Exit(0)
+		return fmt.Errorf("module failed: %s", responseBody.Stderr)
 	}
+	return nil
 }
 
 // ReadInput checks if the only argument is the provided json file and reads the file
